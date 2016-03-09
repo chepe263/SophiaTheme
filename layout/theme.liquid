@@ -30,6 +30,8 @@
   <!-- CSS ================================================== -->
   {{ 'timber.scss.css' | asset_url | stylesheet_tag }}
 
+	{{ 'https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css' | stylesheet_tag }}
+
   <!-- Header hook for plugins ================================================== -->
   {{ content_for_header }}
   {% include 'oldIE-js' %}
@@ -175,50 +177,54 @@
             {% endif %}
           </div>
           <div class="grid__item large--one-half large--text-right medium-down--hide">
-            {% comment %}
-              Show number of items in the cart and total cost in the /cart link
 
-              Ajax Cart Notes:
-                - #cartCount updates the total number of items in the cart
-                - #cartCost updates the total cost of the cart
-                - Documentation:  http://shopify.com/timber#ajax-cart
-            {% endcomment %}
-            <div>
-              <a href="/cart" class="site-header__cart-toggle js-drawer-open-right" aria-controls="CartDrawer" aria-expanded="false">
-                <span class="icon icon-cart" aria-hidden="true"></span>
-                {{ 'layout.cart.title' | t }}
-                (<span id="CartCount">{{ cart.item_count }}</span>
-                {{ 'layout.cart.items_count' | t: count: cart.item_count }}
-                <span id="CartCost">{{ cart.total_price | money }}</span>)
-              </a>
+			<div class="grid">
+				{% comment %}
+				  If customer accounts are enabled, provide login and create account links
+				{% endcomment %}
+				{% if shop.customer_accounts_enabled %}
+				  <div class="grid__item">
+					{% if customer %}
+					  {% if customer.first_name != blank %}
+						{% capture first_name %}<a href="/account">{{ customer.first_name }}</a>{% endcapture %}
+						{{ 'layout.customer.logged_in_as_html' | t: first_name: first_name }}
+					  {% else %}
+						<a href="/account">{{ 'layout.customer.account' | t }}</a>
+					  {% endif %}
+					  | {{ 'layout.customer.log_out' | t | customer_logout_link }}
+					{% else %}
+					  {{ 'layout.customer.log_in' | t | customer_login_link }}
+					  {% if shop.customer_accounts_optional %}
+					  | {{ 'layout.customer.create_account' | t | customer_register_link }}
+					  {% endif %}
+					{% endif %}
+				  </div>
+				{% endif %}
+			</div>
+			<div class="grid large--text-right">
+
+				<div class="site-header__search grid__item large--two-thirds">
+				  {% include 'search-bar' %}
+				</div>
+				{% comment %}
+				  Show number of items in the cart and total cost in the /cart link
+
+				  Ajax Cart Notes:
+					- #cartCount updates the total number of items in the cart
+					- #cartCost updates the total cost of the cart
+					- Documentation:  http://shopify.com/timber#ajax-cart
+				{% endcomment %}
+				<div class="grid__item large--one-third cart-link">
+				  <a href="/cart" class="site-header__cart-toggle js-drawer-open-right btn" aria-controls="CartDrawer" aria-expanded="false">
+					<span class="icon icon-cart" aria-hidden="true"></span>
+					{{ 'layout.cart.title' | t }}
+					(<span id="CartCount">{{ cart.item_count }}</span>
+					{{ 'layout.cart.items_count' | t: count: cart.item_count }}
+					<span id="CartCost">{{ cart.total_price | money }}</span>)
+				  </a>
+				</div>
             </div>
-
-            {% comment %}
-              If customer accounts are enabled, provide login and create account links
-            {% endcomment %}
-            {% if shop.customer_accounts_enabled %}
-              <div>
-                {% if customer %}
-                  {% if customer.first_name != blank %}
-                    {% capture first_name %}<a href="/account">{{ customer.first_name }}</a>{% endcapture %}
-                    {{ 'layout.customer.logged_in_as_html' | t: first_name: first_name }}
-                  {% else %}
-                    <a href="/account">{{ 'layout.customer.account' | t }}</a>
-                  {% endif %}
-                  | {{ 'layout.customer.log_out' | t | customer_logout_link }}
-                {% else %}
-                  {{ 'layout.customer.log_in' | t | customer_login_link }}
-                  {% if shop.customer_accounts_optional %}
-                  | {{ 'layout.customer.create_account' | t | customer_register_link }}
-                  {% endif %}
-                {% endif %}
-              </div>
-            {% endif %}
-
-            <div class="site-header__search">
-              {% include 'search-bar' %}
-            </div>
-          </div>
+          </div> 
         </div>
 
       </div>
@@ -355,7 +361,7 @@
                       <input type="email" value="{% if customer %}{{ customer.email }}{% endif %}" placeholder="{{ 'general.newsletter_form.newsletter_email' | t }}" name="contact[email]" id="Email" class="input-group-field" aria-label="{{ 'general.newsletter_form.newsletter_email' | t }}" autocorrect="off" autocapitalize="off">
                       <input type="hidden" name="contact[tags]" value="newsletter">
                       <span class="input-group-btn">
-                        <input type="submit" class="btn" name="subscribe" id="subscribe" value="{{ 'general.newsletter_form.submit' | t }}">
+                        <input type="submit" class="btn pink-button" name="subscribe" id="subscribe" value="{{ 'general.newsletter_form.submit' | t }}">
                       </span>
                     </div>
                   {% endif %}
@@ -432,6 +438,17 @@
       });
     </script>
   {% endif %}
-
+	{% if settings.slider_enable %}
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bxslider/4.2.5/jquery.bxslider.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bxslider/4.2.5/jquery.bxslider.min.css" />
+		<script>
+			jQuery(document).ready(function(){
+				jQuery('#bxSliderHome').bxSlider({
+				  mode: 'fade',
+				  captions: false
+				});
+			});
+		</script>
+	{% endif %}
 </body>
 </html>
